@@ -1,43 +1,55 @@
 import json
+import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-driver = webdriver.Firefox()
+def scrape():
+    driver = webdriver.Chrome()
+    driver.get("https://ugadmissions.northeastern.edu/transfercredit/TransferCreditEvaluatedStudent2.asp")
+    wait = WebDriverWait(driver, 20)
 
-driver.get("https://ugadmissions.northeastern.edu/transfercredit/TransferCreditevaluatedstudent2.asp")
-wait = WebDriverWait(driver, 10)
+    wait.until(EC.element_to_be_clickable((By.ID, "button1"))).click()
+    print("Clicked 'Proceed to Rules Search' button")
 
-'Proceed to Rules Search button input'
-ptrs = driver.find_element(By.ID, "button1")
+    wait.until(lambda d: len(Select(d.find_element(By.ID, "FICE")).options) > 1)
+    institution_select = Select(driver.find_element(By.ID, "FICE"))
+    institution_count = len(institution_select.options)
 
-ptrs.click()
+    institutions = {}
 
-'Institution options HTML'
-sio = Select(driver.find_element(By.ID, "FICE"))
+    for i in range(1, institution_count):
+        institution_select = Select(driver.find_element(By.ID, "FICE"))
+        inst_opt = institution_select.options[i]
+        inst_name = inst_opt.text.strip()
+        institutions[inst_name] = {"departments": []}
+        print(f"Institution: {inst_name}")
 
-sio_options = sio.options
+        institution_select.select_by_index(i)
+        time.sleep(0.5)
 
-option_values = []
-institution_and_courses = []
-for option in sio_options:
-    id = option.get_attribute("value")
-    institution_name = option.get_attribute("innerHTML")
-    option_values.append(id)
-    institution_and_courses.append(institution_name)
-    print(institution_name)
+        wait.until(lambda d: Select(d.find_element(By.ID, "tseg")).options)
+        dept_select = Select(driver.find_element(By.ID, "tseg"))
 
-with open('options.json', 'w') as f:
-    json.dump(option_values, f, indent=4)
+        if len(dept_select.options) <= 1:
+            print("  No departments found, skipping.")
+            continue
 
-with open('institution_and_courses.json', 'w') as f:
-    json.dump(institution_and_courses, f, indent=4)
+        for j in range(1, len(dept_select.options)):
+            dept_name = dept_select.options[j].text.strip()
+            institutions[inst_name]["departments"].append(dept_name)
+            print(f"  Department: {dept_name}")
 
-for value in option_values:
-    select_element = wait.until(
-        EC.presence_of_element_located((By.ID, "FICE"))
-    )
-    select = Select(select_element)
-    select.select_by_value(value)
+    with open("institutions.json", "w", encoding="utf-8") as f:
+        json.dump(institutions, f, indent=2, ensure_ascii=False)
+
+    driver.quit()
+    print("Department scraping complete!")
+
+if __name__ == "__main__":
+    scrape()
+
+
+
+
