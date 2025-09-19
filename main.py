@@ -1,13 +1,9 @@
 import json
-import re
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-def looks_like_course_code(text):
-    return bool(re.match(r"^[A-Z]{2,4}\s?\d{2,4}$", text))
 
 def scrape():
     driver = webdriver.Chrome()
@@ -23,14 +19,14 @@ def scrape():
 
     institutions = {}
 
-    for i in range(1, min(institution_count, 13)):
+    for i in range(1, min(institution_count, 2750)):
         institution_select = Select(driver.find_element(By.ID, "FICE"))
         inst_opt = institution_select.options[i]
         inst_name = inst_opt.text.strip()
         inst_val = inst_opt.get_attribute("value")
 
         institution_select.select_by_index(i)
-        time.sleep(0.5)
+        time.sleep(0.001)
 
         wait.until(lambda d: Select(d.find_element(By.ID, "tseg")).options)
         dept_select = Select(driver.find_element(By.ID, "tseg"))
@@ -43,6 +39,7 @@ def scrape():
             "institution_value": inst_val,
             "departments": {}
         }
+
         print(f"Institution: {inst_name}")
 
         for j in range(1, len(dept_select.options)):
@@ -54,7 +51,7 @@ def scrape():
             dept_courses = {}
 
             dept_select.select_by_index(j)
-            time.sleep(0.5)
+            time.sleep(0.001)
 
             try:
                 wait.until(EC.presence_of_element_located((By.XPATH, "//table[@border='1']")))
@@ -67,7 +64,9 @@ def scrape():
                         continue
 
                     first_cell = tds[0].text.strip()
-                    if not looks_like_course_code(first_cell):
+                    if not first_cell:
+                        continue
+                    if first_cell.lower().startswith("transfer course"):
                         continue
 
                     mapped_courses = [td.text.strip() if td.text.strip() else "" for td in tds[1:]]
