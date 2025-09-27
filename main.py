@@ -1,7 +1,6 @@
 import json
 import time
 import atexit
-from collections import deque
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
@@ -38,22 +37,20 @@ def scrape():
 
     wait.until(lambda d: len(Select(d.find_element(By.ID, "FICE")).options) > 1)
     institution_select = Select(driver.find_element(By.ID, "FICE"))
-    institution_count = len(institution_select.options)
+    all_institutions = [
+        (opt.text.strip(), opt.get_attribute("value"))
+        for opt in institution_select.options[1:]
+    ]
 
-    queue = deque(range(1, institution_count))
+    already_done = set(institutions.keys()) | institutions_with_nothing
 
-    while queue:
-        i = queue.popleft()
-        institution_select = Select(driver.find_element(By.ID, "FICE"))
-        inst_opt = institution_select.options[i]
-        inst_name = inst_opt.text.strip()
-        inst_val = inst_opt.get_attribute("value")
-
-        if (inst_name in institutions and institutions[inst_name].get("departments")) or inst_name in institutions_with_nothing:
+    for inst_name, inst_val in all_institutions:
+        if inst_name in already_done:
             print(f"Skipping {inst_name} (already scraped or no departments)")
             continue
 
-        institution_select.select_by_index(i)
+        institution_select = Select(driver.find_element(By.ID, "FICE"))
+        institution_select.select_by_value(inst_val)
         time.sleep(0.1)
 
         wait.until(lambda d: Select(d.find_element(By.ID, "tseg")).options)
