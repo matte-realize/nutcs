@@ -2,7 +2,7 @@ import os
 import json
 import time
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,15 +10,14 @@ load_dotenv()
 POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
 POSTGRES_DB = os.getenv('POSTGRES_DB')
+LOCAL_PORT = os.getenv('LOCAL_PORT')
 
-print("Awaiting for PostgreSQL to be ready...")
+print("Awaiting PostgreSQL...")
 time.sleep(8)
 
-DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@postgres:5432/{POSTGRES_DB}"
-
+DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:{LOCAL_PORT}/{POSTGRES_DB}"
 engine = create_engine(DATABASE_URL)
 
-print("Reading JSON data...")
 with open("institutions_and_courses.json", "r") as f:
     data = json.load(f)
 
@@ -40,7 +39,6 @@ for academy_name, academy_data in data.items():
 
 df = pd.DataFrame(rows)
 
-print("Translating data to PostgreSQL...")
-df.to_sql("NUTCS_RAW", engine, if_exists = "replace", index=False)
+df.to_sql("NUTCS_RAW", engine, schema="public", if_exists="replace", index=False)
 
-print("Table created successfully.")
+print("Table created successfully!")
