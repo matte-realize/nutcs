@@ -1,5 +1,46 @@
+import os
 import json
-import psycopg2
+import time
+import pandas as pd
+from sqlalchemy import create_engine, text
+from dotenv import load_dotenv
 
-with open("institutions_and_courses.json", "r", encoding="utf-8") as f:
-    institutions = json.load(f)
+load_dotenv()
+
+POSTGRES_USER = os.getenv('POSTGRES_USER')
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+POSTGRES_DB = os.getenv('POSTGRES_DB')
+
+print("Awaiting for PostgreSQL to be ready...")
+time.sleep(8)
+
+DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@postgres:5432/{POSTGRES_DB}"
+
+engine = create_engine(DATABASE_URL)
+
+print("Reading JSON data...")
+with open("institutions_and_courses.json", "r") as f:
+    data = json.load(f)
+
+rows = []
+for academy_name, academy_data in data.items():
+    departments = academy_data.get("departments", {})
+    for dept_name, courses in departments.items():
+        for course_code, course_info in courses.items():
+            row = {
+                "academy_name": academy_name,
+                "department": dept_name,
+                "course_code": course_code,
+                "transfer_credit": course_info[0],
+                "effective_date": course_info[1],
+                "nucore": course_info[2],
+                "nupath": course_info[3]
+            }
+            rows.append(row)
+
+df = pd.DataFrame(rows)
+
+print("Translating data to PostgreSQL...")
+df.to_sql("NUTCS_RAW", engine, if_exists = "replace", index=False)
+
+print("Table created successfully.")
