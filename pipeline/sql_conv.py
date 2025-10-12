@@ -18,7 +18,7 @@ time.sleep(8)
 DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:{LOCAL_PORT}/{POSTGRES_DB}"
 engine = create_engine(DATABASE_URL)
 
-with open("institutions_and_courses.json", "r") as f:
+with open("../data/institutions_and_courses.json", "r") as f:
     data = json.load(f)
 
 rows = []

@@ -1,17 +1,17 @@
-# NUTCS Scraper
+# NUTCS Data Service
 
 This is the scraper used to scrape the Northeastern University Transfer Credits website.
 Using Selenium, the data has been scraped into JSON format and organized with institutions 
 with course data and institutions without course data. The data is then converted using
 sqlalchemy and normalized using pandas into PostgreSQL data. Docker is used to containerize
-the data set.
+the data set. SQL files are used to query out the data.
 
 ## Scraper
 
 To run the scraper, use the terminal and run:
 
 ```
-python main.py
+python pipeline/scraper.py
 ```
 
 In PyCharm, click the play button to run the scraper.
@@ -28,7 +28,7 @@ docker compose up -d
 To run the conversion, run the following command in terminal:
 
 ``` 
-python sql_conv.py
+python pipeline/sql_conv.py
 ```
 
 ## Connect to the database
@@ -42,7 +42,7 @@ Database: your_database_name
 User: postgres
 Password: your_password
 
-NMake sure public schema is checked off.
+Make sure public schema is checked off.
 ```
 
 ## Debugging

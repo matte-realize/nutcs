@@ -21,13 +21,13 @@ def scrape():
     wait = WebDriverWait(driver, 20)
 
     try:
-        with open("institutions_and_courses.json", "r", encoding="utf-8") as f:
+        with open("../data/institutions_and_courses.json", "r", encoding="utf-8") as f:
             institutions = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         institutions = {}
 
     try:
-        with open("institutions_with_nothing.json", "r", encoding="utf-8") as f:
+        with open("../data/institutions_with_nothing.json", "r", encoding="utf-8") as f:
             institutions_with_nothing = set(json.load(f))
     except (FileNotFoundError, json.JSONDecodeError):
         institutions_with_nothing = set()
@@ -59,7 +59,7 @@ def scrape():
         if len(dept_select.options) <= 1:
             print(f"{inst_name} has no departments → adding to institutions_with_nothing")
             institutions_with_nothing.add(inst_name)
-            with open("institutions_with_nothing.json", "w", encoding="utf-8") as f:
+            with open("../data/institutions_with_nothing.json", "w", encoding="utf-8") as f:
                 json.dump(sorted(institutions_with_nothing), f, indent=2, ensure_ascii=False)
             continue
 
@@ -109,7 +109,7 @@ def scrape():
             except Exception as e:
                 print(f"    No courses found for {dept_code}: {e}")
 
-        with open("institutions_and_courses.json", "w", encoding="utf-8") as f:
+        with open("../data/institutions_and_courses.json", "w", encoding="utf-8") as f:
             json.dump(institutions, f, indent=2, ensure_ascii=False)
         print(f"Saved progress for {inst_name}")
 

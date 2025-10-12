@@ -1,1 +1,0 @@
-SELECT * FROM public."NUTCS_RAW" LIMIT 10;

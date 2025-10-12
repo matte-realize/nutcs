@@ -8,4 +8,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "sql_conv.py"]
+RUN mkdir -p /app/data
+
+CMD ["sh", "-c", "python pipeline/scraper.py && python pipeline/convert_to_sql.py"]

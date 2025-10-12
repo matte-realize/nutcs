@@ -30,7 +30,7 @@ services:
       - .env
     volumes:
       - .:/app
-    command: ["python", "sql_conv.py"]
+    command: ["sh", "-c", "python pipeline/scraper.py && python pipeline/convert_to_sql.py"]
 
 volumes:
   pg_data:
