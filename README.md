@@ -31,6 +31,25 @@ To run the conversion, run the following command in terminal:
 python pipeline/sql_conv.py
 ```
 
+## Build the search database (for deployment)
+
+The deployed app does **not** use Postgres. It ships a single read-only SQLite
+file that the Next.js API queries on Vercel (no database server, no hosting cost).
+
+To (re)build it from the scraped JSON + `genuni.csv`, run:
+
+```
+python pipeline/build_db.py
+```
+
+This applies the same join + filter logic as `database/cleanup.sql` and writes
+`data/nutcs.db` (one denormalized, indexed `courses` table). It uses only the
+Python standard library — no `pip install` needed. After rebuilding, commit
+`data/nutcs.db` and redeploy.
+
+The Postgres pipeline below (`sql_conv.py`, `csvtosql.py`, Docker) remains for
+local analysis and is not part of the Vercel deployment.
+
 ## Connect to the database
 
 To connect to the database, we should set up our connection with these settings:

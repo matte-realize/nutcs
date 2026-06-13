@@ -1,0 +1,11 @@
+# Keep the Vercel deploy lean: Python tooling and local DB infra are not needed
+# in the serverless build. The data/ folder (including nutcs.db) MUST ship, so
+# it is intentionally NOT ignored here.
+venv/
+.idea/
+pipeline/
+database/
+docker-compose.yml
+Dockerfile
+.env
+.env.example

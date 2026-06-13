@@ -1,3 +1,22 @@
+# Python
 venv/
 .idea/
 .env
+
+# Node / Next.js
+/node_modules
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel
+.vercel
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+
+# NOTE: data/nutcs.db is intentionally committed — it is the production database.
